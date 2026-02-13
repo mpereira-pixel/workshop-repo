@@ -6,8 +6,8 @@ phases:
       - echo Logging in to Amazon ECR...
       - aws --version
       - AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
-      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com
-      - REPOSITORY_URI=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/devops-workshop-app
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+      - REPOSITORY_URI=575553540756.dkr.ecr.us-east-1.amazonaws.com/devops-workshop-app
       - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
       - IMAGE_TAG=build-$(echo $CODEBUILD_BUILD_ID | awk -F":" '{print $2}')
   build:
@@ -23,18 +23,16 @@ phases:
       - docker push $REPOSITORY_URI:latest
       - docker push $REPOSITORY_URI:$IMAGE_TAG
       - printf '{"ImageURI":"%s"}' $REPOSITORY_URI:$IMAGE_TAG > imageDetail.json
-
-# ESTA SECCIÓN DEBE IR FUERA DE 'phases'
 artifacts:
   files: 
-    - 'image*.json'
-    - 'appspec.yaml'
-    - 'taskdef.json'
+      - 'image*.json'
+      - 'appspec.yaml'
+      - 'taskdef.json'
   secondary-artifacts:
-    DefinitionArtifact:
-      files:
-        - appspec.yaml
-        - taskdef.json
-    ImageArtifact:
-      files:
-        - imageDetail.json
+      DefinitionArtifact:
+          files:
+              - appspec.yaml
+              - taskdef.json
+      ImageArtifact:
+          files:
+              - imageDetail.json
